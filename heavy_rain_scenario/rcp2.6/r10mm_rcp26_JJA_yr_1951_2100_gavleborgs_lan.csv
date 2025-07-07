@@ -1,0 +1,177 @@
+﻿Observation based data:
+The summer (jun, jul, aug) days with heavy precipitation for Gävleborg County.
+The calculations are based on gridded historical data for daily precipitation. Each grid cell represents an area of about 12x12 km.
+The mean value of the area is based on all the grid cells in the area that consist of more than 50% land according to one of the CORDEX land sea masks.
+
+Scenario data:
+The summer days with heavy precipitation for Gävleborg County.
+The calculations are based on an ensemble of 27 climate model runs, all for the RCP2,6 scenario. Each grid cell represents an area of about 12x12 km.
+Please note that the ensemble consists of fewer model runs during the periods 1951-1970 and 2098-2100.
+The mean value of the area is based on all the grid cells in the area that consist of more than 50% land according to one of the CORDEX land sea masks.
+
+Version:
+1.0
+
+Date:
+2021-11-17
+
+Ensemble members:
+MOHC-HadGEM2-ES_r1i1p1_KNMI-RACMO22E_v2,MOHC-HadGEM2-ES_r1i1p1_DMI-HIRHAM5_v2,CNRM-CERFACS-CNRM-CM5_r1i1p1_CNRM-ALADIN63_v2,MOHC-HadGEM2-ES_r1i1p1_SMHI-RCA4_v1,ICHEC-EC-EARTH_r3i1p1_DMI-HIRHAM5_v2,ICHEC-EC-EARTH_r12i1p1_CLMcom-CCLM4-8-17_v1,MPI-M-MPI-ESM-LR_r1i1p1_KNMI-RACMO22E_v1,CNRM-CERFACS-CNRM-CM5_r1i1p1_GERICS-REMO2015_v2,NCC-NorESM1-M_r1i1p1_ICTP-RegCM4-6_v1,CNRM-CERFACS-CNRM-CM5_r1i1p1_KNMI-RACMO22E_v2,MPI-M-MPI-ESM-LR_r1i1p1_MPI-CSC-REMO2009_v1,MOHC-HadGEM2-ES_r1i1p1_MOHC-HadREM3-GA7-05_v1,ICHEC-EC-EARTH_r12i1p1_KNMI-RACMO22E_v1,MPI-M-MPI-ESM-LR_r1i1p1_CLMcom-CCLM4-8-17_v1,NCC-NorESM1-M_r1i1p1_SMHI-RCA4_v1,MPI-M-MPI-ESM-LR_r1i1p1_SMHI-RCA4_v1a,MPI-M-MPI-ESM-LR_r2i1p1_MPI-CSC-REMO2009_v1,ICHEC-EC-EARTH_r12i1p1_GERICS-REMO2015_v1,MIROC-MIROC5_r1i1p1_GERICS-REMO2015_v1,ICHEC-EC-EARTH_r12i1p1_SMHI-RCA4_v1,NCC-NorESM1-M_r1i1p1_GERICS-REMO2015_v1,MIROC-MIROC5_r1i1p1_CLMcom-CCLM4-8-17_v1,ICHEC-EC-EARTH_r12i1p1_MOHC-HadREM3-GA7-05_v1,MPI-M-MPI-ESM-LR_r1i1p1_ICTP-RegCM4-6_v1,MOHC-HadGEM2-ES_r1i1p1_GERICS-REMO2015_v1,NCC-NorESM1-M_r1i1p1_KNMI-RACMO22E_v1,MOHC-HadGEM2-ES_r1i1p1_ICTP-RegCM4-6_v1
+
+Copyright SMHI
+ 
+Column 1: Year
+Column 2: Observation based data. The summer (jun, jul, aug) days with heavy precipitation, days.
+Column 3: Ensemble, mean value. The summer days with heavy precipitation, days.
+Column 4: Ensemble, 10-percentile, days.
+Column 5: Ensemble, 90-percentile, days.
+year;obs_based;ensemble_mean;tenthPercentile;nintiethPercentile
+"1951";"";5.8;4.1;7.2
+"1952";"";6.8;4.9;9.3
+"1953";"";6.7;4.4;9.5
+"1954";"";6.6;4;9.5
+"1955";"";5.1;2.8;8.5
+"1956";"";7.5;3.9;11.8
+"1957";"";6.5;4.7;9.2
+"1958";"";6.7;3.4;10.2
+"1959";"";5.9;2.8;8.2
+"1960";"";6.4;3.6;10
+"1961";7.1;5.7;3;7.8
+"1962";4.3;6.8;4.4;9.2
+"1963";3.9;5.7;3.9;8.8
+"1964";7;7.2;3.8;10
+"1965";6;6.4;4.6;8.2
+"1966";6.8;6.3;4.2;8
+"1967";3.2;6.1;3.6;9.2
+"1968";4.3;4.8;1.8;6.7
+"1969";6.5;6.4;4;8.9
+"1970";5.1;5.6;3.4;8.8
+"1971";5.9;6.6;3.7;9.8
+"1972";4.6;6.4;3.9;9.1
+"1973";4.8;5.4;2.8;8.2
+"1974";6.1;7.2;4;10.7
+"1975";4;7.4;4.3;10
+"1976";4.1;6.3;3.5;9.7
+"1977";5.4;6.4;3.3;9.3
+"1978";6.6;5.5;3.6;7.5
+"1979";6.2;6.6;4;9.5
+"1980";7.2;5.8;3.7;8.5
+"1981";7.9;5.7;4.2;7.7
+"1982";5.4;5.9;3.3;8.9
+"1983";2.4;7.3;3.5;9.7
+"1984";4.9;6.5;3.8;9.4
+"1985";8.9;5.9;4;7.6
+"1986";9.9;5.5;3.7;7.9
+"1987";7.8;6.9;4.8;9.4
+"1988";4.1;6.1;4.1;8.3
+"1989";3.6;6.6;4.9;8.8
+"1990";4.5;6.3;3.7;8.9
+"1991";6.4;5.8;3.2;8.8
+"1992";8;5.6;3.4;7.9
+"1993";11.1;5.9;3.5;8
+"1994";2.6;6.1;3;9.9
+"1995";6.1;7.1;4.6;10
+"1996";6.6;6.9;4.1;9.2
+"1997";5.8;6.5;3.6;9.8
+"1998";10.2;7.4;5.1;10.3
+"1999";5.4;6.4;4;8.8
+"2000";9.6;7.4;3.7;10.7
+"2001";5.3;8;4.6;11.9
+"2002";7.8;7.1;5;9.2
+"2003";8.2;6.3;4.4;8.2
+"2004";4.4;6.4;3.4;9.4
+"2005";9.9;5.8;3.4;8.8
+"2006";7.8;7.3;4.8;9.6
+"2007";2.2;6.5;4.4;9.2
+"2008";7.3;7.7;4.4;10.4
+"2009";10.3;7.1;4.8;10.7
+"2010";7.1;6.5;4.2;9.7
+"2011";5.5;6.5;3.6;9.2
+"2012";7.8;6.5;3.5;8.7
+"2013";7.8;6.3;3.7;9
+"2014";4;6.6;3.3;10.3
+"2015";5.6;6.9;3.4;9.6
+"2016";4;6.4;3.5;9.6
+"2017";6.1;6.6;3.6;9.6
+"2018";4.7;7.2;4.3;9.7
+"2019";"";7.2;4.2;10.1
+"2020";"";6.8;4.9;9.2
+"2021";"";6.9;4.8;9.9
+"2022";"";8.1;5;11.3
+"2023";"";6.6;4.5;9.5
+"2024";"";7.8;4.7;10.6
+"2025";"";7;3.7;10.5
+"2026";"";6.6;3.6;9.8
+"2027";"";7.6;4.2;10.6
+"2028";"";6.1;3.6;10.5
+"2029";"";6.3;3.5;9.3
+"2030";"";6.9;4.6;9.7
+"2031";"";6;4.3;8
+"2032";"";6.2;4.1;8.7
+"2033";"";5.8;3.3;8.4
+"2034";"";6.8;4;10.2
+"2035";"";5.9;3.5;8.6
+"2036";"";6.8;4.4;9.2
+"2037";"";7.2;3.1;11.1
+"2038";"";6.5;4.2;8.4
+"2039";"";7.6;5.3;9.9
+"2040";"";5.6;2.8;8.9
+"2041";"";6;3.4;9.2
+"2042";"";7.3;4.2;10.4
+"2043";"";6.5;4.3;9.7
+"2044";"";6.9;4.1;10.2
+"2045";"";7.6;4.2;11.2
+"2046";"";8.3;4.7;12.7
+"2047";"";6;2.8;8.4
+"2048";"";8;4.6;12.4
+"2049";"";6.3;4;8.1
+"2050";"";6.8;4.3;10
+"2051";"";6.5;3.4;9.7
+"2052";"";6.1;3.1;9.2
+"2053";"";6.7;3.6;9.4
+"2054";"";6.7;4.1;9.3
+"2055";"";6.4;3.8;9.5
+"2056";"";7.1;3.9;9.5
+"2057";"";7.3;5;9.4
+"2058";"";7.7;3.8;11.4
+"2059";"";6.6;4.2;9.1
+"2060";"";7.7;4.3;11.3
+"2061";"";6.9;4.1;9.8
+"2062";"";5.6;2.5;8.3
+"2063";"";7;4;9.9
+"2064";"";6.5;3.8;8.6
+"2065";"";6.6;3.9;9.6
+"2066";"";7.6;4.5;10.5
+"2067";"";6.6;4.7;9.6
+"2068";"";6.5;3.4;9.2
+"2069";"";6.9;4;10.2
+"2070";"";5.8;2.8;8.7
+"2071";"";6.8;5;9.3
+"2072";"";8.4;4.1;11.1
+"2073";"";7;3.3;9.9
+"2074";"";6.3;4.1;9.8
+"2075";"";7;3.9;9.5
+"2076";"";7;4.5;9.8
+"2077";"";7.7;3.9;11.5
+"2078";"";5.7;2.8;9
+"2079";"";6.3;3.5;9.5
+"2080";"";6.7;4.5;9.4
+"2081";"";7.2;3.9;10
+"2082";"";6;3;10
+"2083";"";7.4;5.1;10.4
+"2084";"";7.5;4.2;10.5
+"2085";"";6.5;3.6;9.5
+"2086";"";7.7;4.7;11.4
+"2087";"";8.8;6;11.7
+"2088";"";7.4;3.8;10.4
+"2089";"";6.2;3.8;8.5
+"2090";"";7.2;3.8;9.8
+"2091";"";7.5;4.7;10.6
+"2092";"";6.6;4.1;8.9
+"2093";"";7.1;5;9.3
+"2094";"";7.5;5.3;9.9
+"2095";"";6.3;3.5;8.6
+"2096";"";7.2;4.4;10
+"2097";"";6.1;4.4;7.7
+"2098";"";7.3;4.7;11
+"2099";"";6.4;2.6;11.4

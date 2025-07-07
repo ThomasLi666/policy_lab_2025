@@ -1,0 +1,177 @@
+﻿Observation based data:
+The winter (dec, jan, feb) days with extreme precipitation for Gävleborg County.
+The calculations are based on gridded historical data for daily precipitation. Each grid cell represents an area of about 12x12 km.
+The mean value of the area is based on all the grid cells in the area that consist of more than 50% land according to one of the CORDEX land sea masks.
+
+Scenario data:
+The winter days with extreme precipitation for Gävleborg County.
+The calculations are based on an ensemble of 27 climate model runs, all for the RCP2,6 scenario. Each grid cell represents an area of about 12x12 km.
+Please note that the ensemble consists of fewer model runs during the periods 1951-1970 and 2098-2100.
+The mean value of the area is based on all the grid cells in the area that consist of more than 50% land according to one of the CORDEX land sea masks.
+
+Version:
+1.0
+
+Date:
+2021-11-17
+
+Ensemble members:
+MOHC-HadGEM2-ES_r1i1p1_KNMI-RACMO22E_v2,MOHC-HadGEM2-ES_r1i1p1_DMI-HIRHAM5_v2,CNRM-CERFACS-CNRM-CM5_r1i1p1_CNRM-ALADIN63_v2,MOHC-HadGEM2-ES_r1i1p1_SMHI-RCA4_v1,ICHEC-EC-EARTH_r3i1p1_DMI-HIRHAM5_v2,ICHEC-EC-EARTH_r12i1p1_CLMcom-CCLM4-8-17_v1,MPI-M-MPI-ESM-LR_r1i1p1_KNMI-RACMO22E_v1,CNRM-CERFACS-CNRM-CM5_r1i1p1_GERICS-REMO2015_v2,NCC-NorESM1-M_r1i1p1_ICTP-RegCM4-6_v1,CNRM-CERFACS-CNRM-CM5_r1i1p1_KNMI-RACMO22E_v2,MPI-M-MPI-ESM-LR_r1i1p1_MPI-CSC-REMO2009_v1,MOHC-HadGEM2-ES_r1i1p1_MOHC-HadREM3-GA7-05_v1,ICHEC-EC-EARTH_r12i1p1_KNMI-RACMO22E_v1,MPI-M-MPI-ESM-LR_r1i1p1_CLMcom-CCLM4-8-17_v1,NCC-NorESM1-M_r1i1p1_SMHI-RCA4_v1,MPI-M-MPI-ESM-LR_r1i1p1_SMHI-RCA4_v1a,MPI-M-MPI-ESM-LR_r2i1p1_MPI-CSC-REMO2009_v1,ICHEC-EC-EARTH_r12i1p1_GERICS-REMO2015_v1,MIROC-MIROC5_r1i1p1_GERICS-REMO2015_v1,ICHEC-EC-EARTH_r12i1p1_SMHI-RCA4_v1,NCC-NorESM1-M_r1i1p1_GERICS-REMO2015_v1,MIROC-MIROC5_r1i1p1_CLMcom-CCLM4-8-17_v1,ICHEC-EC-EARTH_r12i1p1_MOHC-HadREM3-GA7-05_v1,MPI-M-MPI-ESM-LR_r1i1p1_ICTP-RegCM4-6_v1,MOHC-HadGEM2-ES_r1i1p1_GERICS-REMO2015_v1,NCC-NorESM1-M_r1i1p1_KNMI-RACMO22E_v1,MOHC-HadGEM2-ES_r1i1p1_ICTP-RegCM4-6_v1
+
+Copyright SMHI
+ 
+Column 1: Year
+Column 2: Observation based data. The winter (dec, jan, feb) days with extreme precipitation, days.
+Column 3: Ensemble, mean value. The winter days with extreme precipitation, days.
+Column 4: Ensemble, 10-percentile, days.
+Column 5: Ensemble, 90-percentile, days.
+year;obs_based;ensemble_mean;tenthPercentile;nintiethPercentile
+"1951";"";0.2;0;0.5
+"1952";"";0.1;0;0.3
+"1953";"";0.2;0;0.5
+"1954";"";0.2;0;0.5
+"1955";"";0.3;0;0.9
+"1956";"";0.3;0;0.6
+"1957";"";0.2;0;0.3
+"1958";"";0.1;0;0.4
+"1959";"";0.1;0;0.4
+"1960";"";0.4;0;0.6
+"1961";0;0.2;0;0.7
+"1962";0.5;0.3;0;0.9
+"1963";0.4;0.2;0;0.3
+"1964";0;0.2;0;0.6
+"1965";0.3;0.4;0;0.8
+"1966";0.8;0.2;0;0.4
+"1967";0.6;0.4;0;0.7
+"1968";0;0.3;0;0.8
+"1969";0.1;0.2;0;0.4
+"1970";0;0.2;0;0.6
+"1971";0;0.4;0;1
+"1972";0;0.2;0;0.5
+"1973";0;0.2;0;0.6
+"1974";0.1;0.2;0;0.4
+"1975";0.1;0.2;0;0.5
+"1976";0.3;0.3;0;0.7
+"1977";0.5;0.4;0;0.7
+"1978";0;0.2;0;0.6
+"1979";0.2;0.2;0;0.7
+"1980";0;0.3;0;0.6
+"1981";0;0.2;0;0.5
+"1982";0.3;0.2;0;0.4
+"1983";0.2;0.3;0;0.6
+"1984";0.2;0.1;0;0.4
+"1985";0.1;0.2;0;0.5
+"1986";0;0.2;0;0.4
+"1987";1.4;0.2;0;0.6
+"1988";0;0.3;0;0.6
+"1989";0.4;0.1;0;0.2
+"1990";0.1;0.2;0;0.5
+"1991";0.1;0.2;0;0.5
+"1992";0;0.3;0.1;0.6
+"1993";0;0.3;0.1;0.6
+"1994";0.1;0.2;0;0.5
+"1995";0.3;0.1;0;0.4
+"1996";0;0.2;0;0.4
+"1997";0;0.1;0;0.2
+"1998";0.2;0.2;0;0.5
+"1999";0.5;0.3;0;0.7
+"2000";0.3;0.2;0;0.6
+"2001";0.2;0.3;0;0.6
+"2002";0.3;0.2;0;0.5
+"2003";0;0.2;0;0.6
+"2004";0;0.3;0;0.5
+"2005";0.1;0.4;0;0.9
+"2006";0;0.4;0;0.9
+"2007";0.1;0.3;0;0.7
+"2008";0.5;0.6;0;1.7
+"2009";0.3;0.3;0;0.5
+"2010";0.1;0.5;0;0.9
+"2011";0.5;0.3;0;0.7
+"2012";0.1;0.4;0;1
+"2013";0.2;0.3;0;0.7
+"2014";0.5;0.4;0;0.8
+"2015";1.1;0.4;0;1
+"2016";0.2;0.4;0;1.2
+"2017";0;0.2;0;0.6
+"2018";0.5;0.4;0;1
+"2019";"";0.3;0;0.6
+"2020";"";0.1;0;0.3
+"2021";"";0.4;0;0.8
+"2022";"";0.3;0;0.6
+"2023";"";0.3;0;0.7
+"2024";"";0.3;0;0.7
+"2025";"";0.3;0;0.8
+"2026";"";0.2;0;0.5
+"2027";"";0.5;0;1.1
+"2028";"";0.4;0;1.2
+"2029";"";0.4;0;0.9
+"2030";"";0.3;0;0.7
+"2031";"";0.3;0;0.7
+"2032";"";0.3;0;0.5
+"2033";"";0.5;0.1;1.2
+"2034";"";0.4;0;1.1
+"2035";"";0.3;0;0.7
+"2036";"";0.3;0;0.8
+"2037";"";0.3;0;0.7
+"2038";"";0.4;0.1;0.8
+"2039";"";0.4;0;0.7
+"2040";"";0.5;0.1;1.1
+"2041";"";0.4;0;0.8
+"2042";"";0.5;0.1;0.8
+"2043";"";0.3;0;0.9
+"2044";"";0.3;0;0.8
+"2045";"";0.5;0;1.6
+"2046";"";0.4;0.1;1
+"2047";"";0.3;0;0.6
+"2048";"";0.4;0.1;0.9
+"2049";"";0.4;0;0.8
+"2050";"";0.7;0;1.9
+"2051";"";0.3;0;0.8
+"2052";"";0.4;0;0.8
+"2053";"";0.3;0;0.6
+"2054";"";0.4;0.1;0.8
+"2055";"";0.5;0;1.1
+"2056";"";0.6;0.1;1.1
+"2057";"";0.4;0;0.9
+"2058";"";0.2;0;0.6
+"2059";"";0.7;0.1;1.6
+"2060";"";0.4;0.1;0.8
+"2061";"";0.4;0;1.1
+"2062";"";0.5;0.1;0.9
+"2063";"";0.4;0;0.9
+"2064";"";0.4;0;0.9
+"2065";"";0.2;0;0.4
+"2066";"";0.4;0;1
+"2067";"";0.4;0.1;0.9
+"2068";"";0.4;0;0.7
+"2069";"";0.4;0;1
+"2070";"";0.4;0;0.7
+"2071";"";0.3;0;0.7
+"2072";"";0.3;0;0.8
+"2073";"";0.3;0;0.8
+"2074";"";0.3;0;0.6
+"2075";"";0.4;0;0.9
+"2076";"";0.5;0.1;1.1
+"2077";"";0.3;0;0.9
+"2078";"";0.3;0;0.9
+"2079";"";0.5;0.1;1
+"2080";"";0.3;0;0.7
+"2081";"";0.4;0;1.2
+"2082";"";0.4;0.1;0.8
+"2083";"";0.5;0;1.1
+"2084";"";0.4;0;0.9
+"2085";"";0.5;0;0.9
+"2086";"";0.7;0.1;1.5
+"2087";"";0.7;0.1;1.3
+"2088";"";0.4;0;0.9
+"2089";"";0.4;0;1
+"2090";"";0.5;0;0.9
+"2091";"";0.4;0.1;0.8
+"2092";"";0.4;0.1;1
+"2093";"";0.4;0.1;0.8
+"2094";"";0.3;0;0.7
+"2095";"";0.5;0;1.4
+"2096";"";0.3;0.1;0.5
+"2097";"";0.3;0;0.6
+"2098";"";0.7;0.1;1.5
+"2099";"";0.4;0;0.9
