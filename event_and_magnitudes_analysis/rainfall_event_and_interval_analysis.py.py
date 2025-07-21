@@ -1,18 +1,16 @@
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import expon, gamma, genextreme
 
-# Read and clean data
+# ========== 1. Read and clean data ==========
 df = pd.read_csv('C:/Users/123/Downloads/policy_lab/policy_lab_2025/event_and_magnitudes_analysis/historical_precipitation_fixed.csv')
 df['Date'] = pd.to_datetime(df['Representative date'], dayfirst=True)
 df['Precip'] = pd.to_numeric(df['Rainfall'], errors='coerce')
 df = df[['Date', 'Precip']].sort_values('Date').reset_index(drop=True)
 df['year'] = df['Date'].dt.year
 
-# Add season and decade columns
-# Assign each row to a meteorological season and decade period
+# ========== 2. Add season and decade columns ==========
 def get_season(month):
     if month in [12, 1, 2]:
         return 'Winter'
@@ -25,8 +23,7 @@ def get_season(month):
 df['season'] = df['Date'].dt.month.apply(get_season)
 df['decade'] = pd.cut(df['year'], bins=[2004, 2014, 2025], labels=['2005-2014', '2015-2025'], right=True)
 
-# Event detection function
-# Detect consecutive days above a given precipitation threshold as an event
+# ========== 3. Event detection function ==========
 def find_events(subdf, threshold):
     events = []
     in_event = False
@@ -49,30 +46,29 @@ def find_events(subdf, threshold):
             in_event = False
     return pd.DataFrame(events)
 
-# Grouped analysis (by decade and season)
-# For each decade and each season, extract events, intervals, and event magnitudes
+# ========== 4. Grouped analysis (strictly per year/season) ==========
 results = {}
 for dec in df['decade'].dropna().unique():
     for sea in ['Winter', 'Spring', 'Summer', 'Autumn']:
-        subdf = df[(df['decade'] == dec) & (df['season'] == sea)]
-        for label, thresh in [('heavy', 10), ('extreme', 20)]:
-            key = f'{label}_{dec}_{sea}'
-            events = find_events(subdf, threshold=thresh)
-            intervals = pd.Series(dtype='timedelta64[ns]')
-            if len(events) > 1:
-                intervals = events['start_date'].iloc[1:].reset_index(drop=True) - events['end_date'].iloc[:-1].reset_index(drop=True)
-            magnitudes = events['total_precip'] if len(events) > 0 else pd.Series(dtype=float)
-            results[key] = {
-                'events': events,
-                'intervals': intervals,
-                'magnitudes': magnitudes,
-                'season_length': len(subdf),
-                'first_day': subdf['Date'].min() if not subdf.empty else None,
-                'last_day': subdf['Date'].max() if not subdf.empty else None
-            }
+        for year in sorted(df['year'].unique()):
+            subdf = df[(df['decade'] == dec) & (df['season'] == sea) & (df['year'] == year)]
+            for label, thresh in [('heavy', 10), ('extreme', 20)]:
+                key = f'{label}_{dec}_{sea}_{year}'
+                events = find_events(subdf, threshold=thresh)
+                intervals = pd.Series(dtype='timedelta64[ns]')
+                if len(events) > 1:
+                    intervals = events['start_date'].iloc[1:].reset_index(drop=True) - events['end_date'].iloc[:-1].reset_index(drop=True)
+                magnitudes = events['total_precip'] if len(events) > 0 else pd.Series(dtype=float)
+                results[key] = {
+                    'events': events,
+                    'intervals': intervals,
+                    'magnitudes': magnitudes,
+                    'season_length': len(subdf),
+                    'first_day': subdf['Date'].min() if not subdf.empty else None,
+                    'last_day': subdf['Date'].max() if not subdf.empty else None
+                }
 
-# Fit distributions for intervals and magnitudes
-# For each group, fit exponential/gamma to intervals, and GEV to event magnitudes
+# ========== 5. Fit distributions for intervals and magnitudes ==========
 def fit_and_report(data, dist='expon'):
     data = np.asarray(data)
     if len(data) == 0 or np.any(np.isnan(data)):
@@ -80,13 +76,20 @@ def fit_and_report(data, dist='expon'):
     if dist == 'expon':
         params = expon.fit(data)
     elif dist == 'gamma':
-        params = gamma.fit(data)
+        if len(data) < 2:  # 关键改动！
+            return None
+        try:
+            params = gamma.fit(data)
+        except Exception as e:
+            print(f"Fit error for gamma on data {data}: {e}")
+            return None
     elif dist == 'gev':
         if len(data) < 2: return None
         params = genextreme.fit(data)
     else:
         raise ValueError('Unsupported distribution')
     return params
+
 
 fit_results = {}
 for key, d in results.items():
@@ -98,82 +101,34 @@ for key, d in results.items():
         'gev_magnitude': fit_and_report(mags, 'gev') if len(mags) > 1 else None
     }
 
-# Print one example group fit and summary
-example_key = 'heavy_2005-2014_Summer'
-print(f"\n=== {example_key} ===")
-print("Events Table:\n", results[example_key]['events'])
-print("Intervals (days):", results[example_key]['intervals'].dt.days.values if not results[example_key]['intervals'].empty else [])
-print("Magnitudes:", results[example_key]['magnitudes'].values if not results[example_key]['magnitudes'].empty else [])
-print("Exp fit (interval):", fit_results[example_key]['exp_interval'])
-print("Gamma fit (interval):", fit_results[example_key]['gamma_interval'])
-print("GEV fit (magnitude):", fit_results[example_key]['gev_magnitude'])
+# ========== 6. Example: merge all summers in a decade ==========
+all_summer_intervals = []
+for key, d in results.items():
+    if key.startswith('heavy_2005-2014_Summer'):
+        all_summer_intervals.extend(d['intervals'].dt.days.dropna().tolist())
+all_summer_intervals = np.array(all_summer_intervals)
+# Now you can fit distributions or plot histograms with all_summer_intervals
 
-# Plot histograms and fitted distributions
-# Visualize interval and magnitude distributions, overlay fitted distributions
-intervals = results[example_key]['intervals'].dt.days.values if not results[example_key]['intervals'].empty else []
-if len(intervals) > 0:
-    plt.hist(intervals, bins=10, alpha=0.6, label='Intervals')
-    x = np.linspace(0, max(intervals), 100)
-    if fit_results[example_key]['exp_interval'] is not None:
-        plt.plot(x, len(intervals)*(np.diff(np.histogram(intervals, bins=10)[1])[0])*expon.pdf(x, *fit_results[example_key]['exp_interval']), label='Exp fit')
-    if fit_results[example_key]['gamma_interval'] is not None:
-        plt.plot(x, len(intervals)*(np.diff(np.histogram(intervals, bins=10)[1])[0])*gamma.pdf(x, *fit_results[example_key]['gamma_interval']), label='Gamma fit')
-    plt.legend()
-    plt.title(f"{example_key} - Event intervals")
-    plt.xlabel("Interval (days)")
-    plt.ylabel("Count")
-    plt.show()
-
-magnitudes = results[example_key]['magnitudes'].values if not results[example_key]['magnitudes'].empty else []
-if len(magnitudes) > 1 and fit_results[example_key]['gev_magnitude'] is not None:
-    plt.hist(magnitudes, bins=10, alpha=0.6, label='Event magnitude')
-    x = np.linspace(min(magnitudes), max(magnitudes), 100)
-    c, loc, scale = fit_results[example_key]['gev_magnitude']
-    plt.plot(x, len(magnitudes)*(np.diff(np.histogram(magnitudes, bins=10)[1])[0])*genextreme.pdf(x, c, loc, scale), label='GEV fit')
-    plt.legend()
-    plt.title(f"{example_key} - Event magnitudes")
-    plt.xlabel("Total precipitation (mm)")
-    plt.ylabel("Count")
-    plt.show()
-
-# Export summary table (seasonal info, event count, etc.)
-# Export summary table with seasonal statistics for each group
+# ========== 7. Export results ==========
+# Summary table (by group)
 summary = []
-for dec in df['decade'].dropna().unique():
-    for sea in ['Winter', 'Spring', 'Summer', 'Autumn']:
-        for label in ['heavy', 'extreme']:
-            key = f'{label}_{dec}_{sea}'
-            d = results.get(key, None)
-            if d is not None:
-                n_events = len(d['events'])
-                season_length = d['season_length']
-                first_day = d['first_day']
-                last_day = d['last_day']
-            else:
-                n_events = 0
-                subdf = df[(df['decade'] == dec) & (df['season'] == sea)]
-                season_length = len(subdf)
-                first_day = subdf['Date'].min() if not subdf.empty else None
-                last_day = subdf['Date'].max() if not subdf.empty else None
-            summary.append({
-                'group': key,
-                'n_events': n_events,
-                'has_event': n_events > 0,
-                'season_length': season_length,
-                'first_day': first_day,
-                'last_day': last_day
-            })
-
+for key, d in results.items():
+    summary.append({
+        'group': key,
+        'n_events': len(d['events']),
+        'has_event': len(d['events']) > 0,
+        'season_length': d['season_length'],
+        'first_day': d['first_day'],
+        'last_day': d['last_day']
+    })
 summary_df = pd.DataFrame(summary)
 summary_df.to_csv('seasonal_event_summary.csv', index=False)
 
 # Export all event tables (optional)
-# Export detailed event tables for each group
 for key, d in results.items():
     d['events'].to_csv(f'{key}_events.csv', index=False)
 
-# Export intervals and magnitudes for each group
-# Export interval tables with contextual info for each group
+# Export intervals (with previous/next info) for each group
 for key, d in results.items():
     events = d['events']
     intervals = d['intervals']
@@ -187,12 +142,32 @@ for key, d in results.items():
         })
         intervals_df.to_csv(f'{key}_intervals.csv', index=False)
 
-# Count yearly/seasonal events for each year and season (for completeness)
+# ========== 这里加 ==========
+intervals_data = []
+for key, d in results.items():
+    events = d['events']
+    intervals = d['intervals']
+    if not intervals.empty and len(events) > 1:
+        for idx, interval in enumerate(intervals):
+            intervals_data.append({
+                'group': key,
+                'interval_days': interval.days,
+                'censored': False
+            })
+    if len(events) == 0:
+        intervals_data.append({
+            'group': key,
+            'interval_days': d['season_length'],
+            'censored': True
+        })
+intervals_censor_df = pd.DataFrame(intervals_data)
+intervals_censor_df.to_csv('intervals_with_censoring.csv', index=False)
+
+# 统计每年每季的 heavy/extreme 事件数
 event_counts = []
 for label, thresh in [('heavy', 10), ('extreme', 20)]:
     for year in sorted(df['year'].unique()):
         for season in ['Winter', 'Spring', 'Summer', 'Autumn']:
-            # For each year and season, count the number of detected events
             mask = (df['year'] == year) & (df['season'] == season)
             subdf = df[mask]
             events = find_events(subdf, threshold=thresh)
@@ -206,3 +181,52 @@ event_counts_df = pd.DataFrame(event_counts)
 event_counts_df.to_csv('yearly_seasonal_event_counts.csv', index=False)
 
 print("\nAll results have been processed and exported.")
+
+
+# ======== Visualize intervals for all 2005-2014 summers (heavy events) ========
+if len(all_summer_intervals) > 0:
+    plt.hist(all_summer_intervals, bins=10, alpha=0.6, label='Intervals')
+    x = np.linspace(0, max(all_summer_intervals), 100)
+    exp_params = expon.fit(all_summer_intervals)
+    plt.plot(x, len(all_summer_intervals)*(np.diff(np.histogram(all_summer_intervals, bins=10)[1])[0])
+             *expon.pdf(x, *exp_params), label='Exp fit')
+    if len(all_summer_intervals) > 1:
+        try:
+            gamma_params = gamma.fit(all_summer_intervals)
+            plt.plot(x, len(all_summer_intervals)*(np.diff(np.histogram(all_summer_intervals, bins=10)[1])[0])
+                     *gamma.pdf(x, *gamma_params), label='Gamma fit')
+        except Exception as e:
+            print(f"Gamma fit error: {e}")
+    plt.legend()
+    plt.title("All 2005-2014 Summer Heavy Event Intervals")
+    plt.xlabel("Interval (days)")
+    plt.ylabel("Count")
+    plt.show()
+
+
+# ===== Plot all summer (2005-2014) heavy event magnitudes and GEV fit
+all_summer_magnitudes = []
+for key, d in results.items():
+    if key.startswith('heavy_2005-2014_Summer'):
+        all_summer_magnitudes.extend(d['magnitudes'].dropna().tolist())
+all_summer_magnitudes = np.array(all_summer_magnitudes)
+
+# 2. 只画有数据的情况
+if len(all_summer_magnitudes) > 1:
+    # 3. 进行GEV分布拟合
+    gev_params = fit_and_report(all_summer_magnitudes, 'gev')
+
+    plt.figure()
+    plt.hist(all_summer_magnitudes, bins=10, alpha=0.6, label='Event magnitude')
+    x = np.linspace(min(all_summer_magnitudes), max(all_summer_magnitudes), 100)
+    if gev_params is not None:
+        c, loc, scale = gev_params
+        plt.plot(x, len(all_summer_magnitudes)*(np.diff(np.histogram(all_summer_magnitudes, bins=10)[1])[0])*
+                 genextreme.pdf(x, c, loc, scale), label='GEV fit')
+    plt.legend()
+    plt.title("All 2005-2014 Summer Heavy Event Magnitudes")
+    plt.xlabel("Total precipitation (mm)")
+    plt.ylabel("Count")
+    plt.show()
+else:
+    print("Not enough magnitude data for GEV fitting and plotting.")
