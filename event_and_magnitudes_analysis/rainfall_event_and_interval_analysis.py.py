@@ -1,18 +1,17 @@
-# 1. Import packages
+
 import pandas as pd
 import numpy as np
-from datetime import datetime
 import matplotlib.pyplot as plt
 from scipy.stats import expon, gamma, genextreme
 
-# 2. Read and clean data
+# Read and clean data
 df = pd.read_csv('C:/Users/123/Downloads/policy_lab/policy_lab_2025/event_and_magnitudes_analysis/historical_precipitation_fixed.csv')
 df['Date'] = pd.to_datetime(df['Representative date'], dayfirst=True)
 df['Precip'] = pd.to_numeric(df['Rainfall'], errors='coerce')
 df = df[['Date', 'Precip']].sort_values('Date').reset_index(drop=True)
 df['year'] = df['Date'].dt.year
 
-# 3. Add season and decade columns
+# Add season and decade columns
 # Assign each row to a meteorological season and decade period
 def get_season(month):
     if month in [12, 1, 2]:
@@ -26,7 +25,7 @@ def get_season(month):
 df['season'] = df['Date'].dt.month.apply(get_season)
 df['decade'] = pd.cut(df['year'], bins=[2004, 2014, 2025], labels=['2005-2014', '2015-2025'], right=True)
 
-# 4. Event detection function
+# Event detection function
 # Detect consecutive days above a given precipitation threshold as an event
 def find_events(subdf, threshold):
     events = []
@@ -50,7 +49,7 @@ def find_events(subdf, threshold):
             in_event = False
     return pd.DataFrame(events)
 
-# 5. Grouped analysis (by decade and season)
+# Grouped analysis (by decade and season)
 # For each decade and each season, extract events, intervals, and event magnitudes
 results = {}
 for dec in df['decade'].dropna().unique():
@@ -72,7 +71,7 @@ for dec in df['decade'].dropna().unique():
                 'last_day': subdf['Date'].max() if not subdf.empty else None
             }
 
-# 6. Fit distributions for intervals and magnitudes
+# Fit distributions for intervals and magnitudes
 # For each group, fit exponential/gamma to intervals, and GEV to event magnitudes
 def fit_and_report(data, dist='expon'):
     data = np.asarray(data)
@@ -99,7 +98,7 @@ for key, d in results.items():
         'gev_magnitude': fit_and_report(mags, 'gev') if len(mags) > 1 else None
     }
 
-# 7. Print one example group fit and summary
+# Print one example group fit and summary
 example_key = 'heavy_2005-2014_Summer'
 print(f"\n=== {example_key} ===")
 print("Events Table:\n", results[example_key]['events'])
@@ -109,7 +108,7 @@ print("Exp fit (interval):", fit_results[example_key]['exp_interval'])
 print("Gamma fit (interval):", fit_results[example_key]['gamma_interval'])
 print("GEV fit (magnitude):", fit_results[example_key]['gev_magnitude'])
 
-# 8. Plot histograms and fitted distributions
+# Plot histograms and fitted distributions
 # Visualize interval and magnitude distributions, overlay fitted distributions
 intervals = results[example_key]['intervals'].dt.days.values if not results[example_key]['intervals'].empty else []
 if len(intervals) > 0:
@@ -137,7 +136,7 @@ if len(magnitudes) > 1 and fit_results[example_key]['gev_magnitude'] is not None
     plt.ylabel("Count")
     plt.show()
 
-# 9. Export summary table (seasonal info, event count, etc.)
+# Export summary table (seasonal info, event count, etc.)
 # Export summary table with seasonal statistics for each group
 summary = []
 for dec in df['decade'].dropna().unique():
@@ -168,12 +167,12 @@ for dec in df['decade'].dropna().unique():
 summary_df = pd.DataFrame(summary)
 summary_df.to_csv('seasonal_event_summary.csv', index=False)
 
-# 10. Export all event tables (optional)
+# Export all event tables (optional)
 # Export detailed event tables for each group
 for key, d in results.items():
     d['events'].to_csv(f'{key}_events.csv', index=False)
 
-# 11. Export intervals and magnitudes for each group
+# Export intervals and magnitudes for each group
 # Export interval tables with contextual info for each group
 for key, d in results.items():
     events = d['events']
@@ -188,7 +187,7 @@ for key, d in results.items():
         })
         intervals_df.to_csv(f'{key}_intervals.csv', index=False)
 
-# 12. Count yearly/seasonal events for each year and season (for completeness)
+# Count yearly/seasonal events for each year and season (for completeness)
 event_counts = []
 for label, thresh in [('heavy', 10), ('extreme', 20)]:
     for year in sorted(df['year'].unique()):
