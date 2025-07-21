@@ -11,17 +11,32 @@ df = df[['Date', 'Precip']].sort_values('Date').reset_index(drop=True)
 df['year'] = df['Date'].dt.year
 
 # ========== 2. Add season and decade columns ==========
-def get_season(month):
-    if month in [12, 1, 2]:
-        return 'Winter'
-    elif month in [3, 4, 5]:
-        return 'Spring'
-    elif month in [6, 7, 8]:
-        return 'Summer'
+# For cross-year winter season: assign "Winter YYYY/YYYY+1" label
+def get_season_and_winter_label(date):
+    y, m = date.year, date.month
+    if m == 12:
+        return 'Winter', f"{y}/{y+1}"
+    elif m == 1 or m == 2:
+        return 'Winter', f"{y-1}/{y}"
+    elif m in [3,4,5]:
+        return 'Spring', f"{y}"
+    elif m in [6,7,8]:
+        return 'Summer', f"{y}"
     else:
-        return 'Autumn'
-df['season'] = df['Date'].dt.month.apply(get_season)
-df['decade'] = pd.cut(df['year'], bins=[2004, 2014, 2025], labels=['2005-2014', '2015-2025'], right=True)
+        return 'Autumn', f"{y}"
+
+df['season'], df['season_group'] = zip(*df['Date'].apply(get_season_and_winter_label))
+# decade assignment
+def assign_decade(row):
+    # Use the start year for winter, normal year for others
+    yr = int(row['season_group'][:4]) if row['season'] == 'Winter' else int(row['season_group'])
+    if 2005 <= yr <= 2014:
+        return '2005-2014'
+    elif 2015 <= yr <= 2025:
+        return '2015-2025'
+    else:
+        return np.nan
+df['decade'] = df.apply(assign_decade, axis=1)
 
 # ========== 3. Event detection function ==========
 def find_events(subdf, threshold):
@@ -46,27 +61,33 @@ def find_events(subdf, threshold):
             in_event = False
     return pd.DataFrame(events)
 
-# ========== 4. Grouped analysis (strictly per year/season) ==========
+# ========== 4. Grouped analysis (cross-year winter) ==========
 results = {}
-for dec in df['decade'].dropna().unique():
-    for sea in ['Winter', 'Spring', 'Summer', 'Autumn']:
-        for year in sorted(df['year'].unique()):
-            subdf = df[(df['decade'] == dec) & (df['season'] == sea) & (df['year'] == year)]
-            for label, thresh in [('heavy', 10), ('extreme', 20)]:
-                key = f'{label}_{dec}_{sea}_{year}'
-                events = find_events(subdf, threshold=thresh)
-                intervals = pd.Series(dtype='timedelta64[ns]')
-                if len(events) > 1:
-                    intervals = events['start_date'].iloc[1:].reset_index(drop=True) - events['end_date'].iloc[:-1].reset_index(drop=True)
-                magnitudes = events['total_precip'] if len(events) > 0 else pd.Series(dtype=float)
-                results[key] = {
-                    'events': events,
-                    'intervals': intervals,
-                    'magnitudes': magnitudes,
-                    'season_length': len(subdf),
-                    'first_day': subdf['Date'].min() if not subdf.empty else None,
-                    'last_day': subdf['Date'].max() if not subdf.empty else None
-                }
+for dec in ['2005-2014', '2015-2025']:
+    # find all unique group labels in this decade for all seasons
+    available_groups = df.loc[df['decade']==dec, ['season', 'season_group']].drop_duplicates()
+    for _, (season, group_label) in available_groups.iterrows():
+        subdf = df[(df['decade']==dec) & (df['season']==season) & (df['season_group']==group_label)]
+        for label, thresh in [('heavy', 10), ('extreme', 20)]:
+            key = f'{label}_{dec}_{season}_{group_label}'
+            events = find_events(subdf, threshold=thresh)
+            intervals = pd.Series(dtype='timedelta64[ns]')
+            if len(events) > 1:
+                tmp_intervals = (
+                    events['start_date'].iloc[1:].reset_index(drop=True) -
+                    events['end_date'].iloc[:-1].reset_index(drop=True)
+                )
+                max_interval = subdf['Date'].max() - subdf['Date'].min() + pd.Timedelta(days=1)
+                intervals = tmp_intervals[tmp_intervals <= max_interval]
+            magnitudes = events['total_precip'] if len(events) > 0 else pd.Series(dtype=float)
+            results[key] = {
+                'events': events,
+                'intervals': intervals,
+                'magnitudes': magnitudes,
+                'season_length': len(subdf),
+                'first_day': subdf['Date'].min() if not subdf.empty else None,
+                'last_day': subdf['Date'].max() if not subdf.empty else None
+            }
 
 # ========== 5. Fit distributions for intervals and magnitudes ==========
 def fit_and_report(data, dist='expon'):
@@ -76,7 +97,7 @@ def fit_and_report(data, dist='expon'):
     if dist == 'expon':
         params = expon.fit(data)
     elif dist == 'gamma':
-        if len(data) < 2:  # 关键改动！
+        if len(data) < 2:
             return None
         try:
             params = gamma.fit(data)
@@ -90,7 +111,6 @@ def fit_and_report(data, dist='expon'):
         raise ValueError('Unsupported distribution')
     return params
 
-
 fit_results = {}
 for key, d in results.items():
     intervals = d['intervals'].dt.days.values if not d['intervals'].empty else np.array([])
@@ -101,16 +121,7 @@ for key, d in results.items():
         'gev_magnitude': fit_and_report(mags, 'gev') if len(mags) > 1 else None
     }
 
-# ========== 6. Example: merge all summers in a decade ==========
-all_summer_intervals = []
-for key, d in results.items():
-    if key.startswith('heavy_2005-2014_Summer'):
-        all_summer_intervals.extend(d['intervals'].dt.days.dropna().tolist())
-all_summer_intervals = np.array(all_summer_intervals)
-# Now you can fit distributions or plot histograms with all_summer_intervals
-
-# ========== 7. Export results ==========
-# Summary table (by group)
+# ========== 6. Export results ==========
 summary = []
 for key, d in results.items():
     summary.append({
@@ -124,11 +135,13 @@ for key, d in results.items():
 summary_df = pd.DataFrame(summary)
 summary_df.to_csv('seasonal_event_summary.csv', index=False)
 
-# Export all event tables (optional)
-for key, d in results.items():
-    d['events'].to_csv(f'{key}_events.csv', index=False)
+# Safe file names
+def safe_filename(s):
+    return s.replace('/', '-')
 
-# Export intervals (with previous/next info) for each group
+for key, d in results.items():
+    d['events'].to_csv(f'{safe_filename(key)}_events.csv', index=False)
+
 for key, d in results.items():
     events = d['events']
     intervals = d['intervals']
@@ -140,9 +153,9 @@ for key, d in results.items():
             'next_magnitude': events['total_precip'].iloc[1:].values,
             'interval_days': intervals.dt.days.values
         })
-        intervals_df.to_csv(f'{key}_intervals.csv', index=False)
+        intervals_df.to_csv(f'{safe_filename(key)}_intervals.csv', index=False)
 
-# ========== 这里加 ==========
+# ========== Export intervals with censoring indicator (filtered only available groups) ==========
 intervals_data = []
 for key, d in results.items():
     events = d['events']
@@ -163,17 +176,18 @@ for key, d in results.items():
 intervals_censor_df = pd.DataFrame(intervals_data)
 intervals_censor_df.to_csv('intervals_with_censoring.csv', index=False)
 
-# 统计每年每季的 heavy/extreme 事件数
+# ========== Count events per group (use same available_groups logic!) ==========
 event_counts = []
-for label, thresh in [('heavy', 10), ('extreme', 20)]:
-    for year in sorted(df['year'].unique()):
-        for season in ['Winter', 'Spring', 'Summer', 'Autumn']:
-            mask = (df['year'] == year) & (df['season'] == season)
-            subdf = df[mask]
+for dec in ['2005-2014', '2015-2025']:
+    available_groups = df.loc[df['decade']==dec, ['season', 'season_group']].drop_duplicates()
+    for _, (season, group_label) in available_groups.iterrows():
+        subdf = df[(df['decade']==dec) & (df['season']==season) & (df['season_group']==group_label)]
+        for label, thresh in [('heavy', 10), ('extreme', 20)]:
             events = find_events(subdf, threshold=thresh)
             event_counts.append({
-                'year': year,
+                'decade': dec,
                 'season': season,
+                'season_group': group_label,
                 'type': label,
                 'n_events': len(events)
             })
@@ -182,49 +196,51 @@ event_counts_df.to_csv('yearly_seasonal_event_counts.csv', index=False)
 
 print("\nAll results have been processed and exported.")
 
+# ========== Visualization Example ==========
+# Example: Plot all heavy winter intervals in 2005-2014
+all_winter_intervals = []
+for key, d in results.items():
+    if key.startswith('heavy_2005-2014_Winter'):
+        all_winter_intervals.extend(d['intervals'].dt.days.dropna().tolist())
+all_winter_intervals = np.array(all_winter_intervals)
 
-# ======== Visualize intervals for all 2005-2014 summers (heavy events) ========
-if len(all_summer_intervals) > 0:
-    plt.hist(all_summer_intervals, bins=10, alpha=0.6, label='Intervals')
-    x = np.linspace(0, max(all_summer_intervals), 100)
-    exp_params = expon.fit(all_summer_intervals)
-    plt.plot(x, len(all_summer_intervals)*(np.diff(np.histogram(all_summer_intervals, bins=10)[1])[0])
+if len(all_winter_intervals) > 0:
+    plt.hist(all_winter_intervals, bins=10, alpha=0.6, label='Intervals')
+    x = np.linspace(0, max(all_winter_intervals), 100)
+    exp_params = expon.fit(all_winter_intervals)
+    plt.plot(x, len(all_winter_intervals)*(np.diff(np.histogram(all_winter_intervals, bins=10)[1])[0])
              *expon.pdf(x, *exp_params), label='Exp fit')
-    if len(all_summer_intervals) > 1:
+    if len(all_winter_intervals) > 1:
         try:
-            gamma_params = gamma.fit(all_summer_intervals)
-            plt.plot(x, len(all_summer_intervals)*(np.diff(np.histogram(all_summer_intervals, bins=10)[1])[0])
+            gamma_params = gamma.fit(all_winter_intervals)
+            plt.plot(x, len(all_winter_intervals)*(np.diff(np.histogram(all_winter_intervals, bins=10)[1])[0])
                      *gamma.pdf(x, *gamma_params), label='Gamma fit')
         except Exception as e:
             print(f"Gamma fit error: {e}")
     plt.legend()
-    plt.title("All 2005-2014 Summer Heavy Event Intervals")
+    plt.title("All 2005-2014 Winter Heavy Event Intervals")
     plt.xlabel("Interval (days)")
     plt.ylabel("Count")
     plt.show()
+else:
+    print("No data for all winter intervals.")
 
-
-# ===== Plot all summer (2005-2014) heavy event magnitudes and GEV fit
-all_summer_magnitudes = []
+all_winter_magnitudes = []
 for key, d in results.items():
-    if key.startswith('heavy_2005-2014_Summer'):
-        all_summer_magnitudes.extend(d['magnitudes'].dropna().tolist())
-all_summer_magnitudes = np.array(all_summer_magnitudes)
+    if key.startswith('heavy_2005-2014_Winter'):
+        all_winter_magnitudes.extend(d['magnitudes'].dropna().tolist())
+all_winter_magnitudes = np.array(all_winter_magnitudes)
 
-# 2. 只画有数据的情况
-if len(all_summer_magnitudes) > 1:
-    # 3. 进行GEV分布拟合
-    gev_params = fit_and_report(all_summer_magnitudes, 'gev')
-
-    plt.figure()
-    plt.hist(all_summer_magnitudes, bins=10, alpha=0.6, label='Event magnitude')
-    x = np.linspace(min(all_summer_magnitudes), max(all_summer_magnitudes), 100)
+if len(all_winter_magnitudes) > 1:
+    gev_params = fit_and_report(all_winter_magnitudes, 'gev')
+    plt.hist(all_winter_magnitudes, bins=10, alpha=0.6, label='Event magnitude')
+    x = np.linspace(min(all_winter_magnitudes), max(all_winter_magnitudes), 100)
     if gev_params is not None:
         c, loc, scale = gev_params
-        plt.plot(x, len(all_summer_magnitudes)*(np.diff(np.histogram(all_summer_magnitudes, bins=10)[1])[0])*
+        plt.plot(x, len(all_winter_magnitudes)*(np.diff(np.histogram(all_winter_magnitudes, bins=10)[1])[0])*
                  genextreme.pdf(x, c, loc, scale), label='GEV fit')
     plt.legend()
-    plt.title("All 2005-2014 Summer Heavy Event Magnitudes")
+    plt.title("All 2005-2014 Winter Heavy Event Magnitudes")
     plt.xlabel("Total precipitation (mm)")
     plt.ylabel("Count")
     plt.show()
